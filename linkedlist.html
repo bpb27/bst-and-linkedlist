@@ -1,0 +1,347 @@
+<script type="text/javascript">
+
+//*************************************************************
+
+//BINARY SEARCH TREE
+
+function BST(){};
+
+BST.prototype = {
+	length: 0,
+	array: [],
+	root: null,
+	min: null,
+	max: null
+}
+
+BST.prototype.make_node = function(value){
+	var node = new Node(value);
+	this.length++;
+	
+	if(this.root == null){
+		this.root = node;
+	}
+	else{
+		this.place_node(node);
+	}
+
+	if(this.min != null){
+		
+		if(this.min.value > node.value){
+			this.min = node;
+		}
+
+		if(this.max.value < node.value){
+			this.max = node;
+		}
+	}
+
+	this.array.push(value);
+}
+
+BST.prototype.place_node = function(node){
+	
+	var current_node = this.root;
+
+	while(node.parent == null){
+		if(current_node.value > node.value){
+			if(current_node.left_child == null){
+				current_node.left_child = node;
+				node.parent = current_node;
+			}
+			else{
+				current_node = current_node.left_child;
+			}
+		}
+		else{
+			if(current_node.right_child == null){
+				current_node.right_child = node;
+				node.parent = current_node;
+			}
+			else{
+				current_node = current_node.right_child;
+			}
+		}
+	}
+
+}
+
+BST.prototype.sort = function(array){
+
+	for (var i = 0; i < array.length; i++) {
+		this.make_node(array[i]);
+	};
+
+	this.min = this.minValue();
+	this.max = this.maxValue();
+
+};
+
+function Node(value){
+	this.value = value;
+	this.parent = null;
+	this.left_child = null;
+	this.right_child = null;
+}
+
+BST.prototype.maxValue = function(){
+	
+	var current_node = this.root;
+	
+	while(current_node.right_child != null){
+		if(current_node.right_child.right_child == null){
+			return current_node.right_child;
+		}
+		current_node = current_node.right_child;
+	}
+}
+
+BST.prototype.minValue = function(){
+	
+	var current_node = this.root;
+	
+	while(current_node.left_child != null){
+		if(current_node.left_child.left_child == null){
+			return current_node.left_child;
+		}
+		current_node = current_node.left_child;
+	}
+}
+
+BST.prototype.locate = function(num){
+
+	if(this.array.indexOf(num) == -1){
+		console.log("Not found.");
+	}
+	else{
+		
+		var current_node = this.root;
+		
+		while(current_node.value != num){
+			if(current_node.value > num){
+				current_node = current_node.left_child;
+			}
+			else{
+				current_node = current_node.right_child;
+			}
+		}
+		
+		return current_node;
+	
+	}
+}
+
+var myTree = new BST();
+myTree.sort([6, 7, 1, 8, 99, 2]);
+myTree.make_node(778); 
+
+
+
+//*************************************************************
+
+//DOUBLY CIRCULAR LINKED LIST:
+//CREDIT TO https://blog.jcoglan.com/ FOR THE LINKED LIST STARTING STRUCTURE
+
+function LinkedList(){};
+
+//LENGTH WILL COUNT THE TOTAL AMOUNT OF NODES
+//FIRST AND LAST WILL POINT TO START AND END OF LIST
+
+LinkedList.prototype = {
+	length: 0,
+	first: null,
+	last: null
+};
+
+//CREATE A SUBCLASS
+
+LinkedList.Circular = function(){};
+LinkedList.Circular.prototype = new LinkedList;
+
+//THIS REFERS TO THE LIST INSTANCE
+
+LinkedList.Circular.prototype.append = function(node){
+	if(this.first === null){
+		node.prev = node;
+		node.next = node;
+		this.first = node;
+		this.last = node;
+	}
+	else{
+		node.prev = this.last; //NEW NODE PREV IS THE FORMERLY LAST NODE
+		node.next = this.first; //NEW NODE NEXT IS THE FIRST NODE
+		this.first.prev = node;	//FIRST NODE PREV IS THE NEW NODE
+		this.last.next = node; //FORMERLY LAST NODE NEXT IS THE NEW NODE
+		this.last = node; //NEW NODE BECOMES THE NEW LAST NODE
+	}
+	this.length++;
+};
+
+LinkedList.Circular.prototype.insertAfter = function(node, newNode){
+	newNode.prev = node;
+	newNode.next = node.next;
+	node.next.prev = newNode;
+	node.next = newNode;
+	if(newNode.prev == this.last){
+		this.last = newNode;
+	}
+	this.length++;
+};
+
+LinkedList.Circular.prototype.insertBefore = function(node, newNode){
+	newNode.next = node;
+	newNode.prev = node.prev;
+	node.prev.next = newNode;
+	node.prev = newNode;
+	if(newNode.next == this.first){
+		this.first = newNode;
+	}
+	this.length++;
+};
+
+LinkedList.Circular.prototype.remove = function(node){
+	if(this.length > 1){
+		node.prev.next = node.next;
+		node.next.prev = node.prev;
+		if(node == this.first){
+			this.first = node.next;
+		}
+		if(node == this.last){
+			this.last = node.prev;
+		}
+	}
+	else{
+		this.first = null;
+		this.last = null;
+	}
+	node.prev = null;
+	node.last = null;
+	this.length--;
+}
+
+LinkedList.Circular.prototype.locate = function(data){
+	var current_node = this.first;
+	while(current_node.next != this.first){
+		if(current_node.data == data){
+			// console.log(current_node);
+			return current_node;
+		}
+		if(current_node.next == this.last){
+			if(this.last.data == data){
+				return current_node.next;
+			}
+		}
+		current_node = current_node.next;
+	}
+}
+
+LinkedList.Circular.prototype.print_all = function(){
+	var current_node = this.first;
+	while(current_node.next != this.first){
+		console.log(current_node);
+		current_node = current_node.next;
+	}
+};
+
+//CHECK THAT THERE ARE NO MISSING LINKS IN THE CIRCLE
+LinkedList.Circular.prototype.circle_check = function(){
+	var current_node = this.first;
+	var counter = 1;
+	
+	while(current_node.next != this.first){
+		if(current_node == this.last.prev){
+			if(current_node.next == this.last){
+				console.log("Forward Check complete.");
+				if (counter == this.length - 1) {
+					console.log("Length correct.");
+				};
+			}
+		}
+		
+		counter++;
+		current_node = current_node.next;
+
+	}
+	
+	counter = 1;
+	current_node = this.last
+	
+	while(current_node.prev != this.last){
+		if(current_node == this.first.next){
+			if(current_node.prev == this.first){
+				console.log("Backward Check complete.");
+				if (counter == this.length - 1) {
+					console.log("Length correct.");
+				};
+			}
+		}
+		
+		counter++
+		current_node = current_node.prev;
+	
+	}
+
+	if(this.first.prev == this.last && this.last.next == this.first){
+		console.log("First and Last connected.")
+	}
+	
+	counter = 1;
+}
+
+//FIND CENTER OF THE LIST WITH LENGTH
+LinkedList.Circular.prototype.center = function(){
+	var current_node = this.first;
+	for (var i = 0; i < Math.floor(this.length / 2); i++) {
+		current_node = current_node.next;
+	};
+	return current_node;
+}
+
+//FIND CENTER WITHOUT LENGTH
+LinkedList.Circular.prototype.center_two = function(){
+	if(this.first == this.last){
+		return this.first;
+	}
+	else{
+		
+		var	nodeStart = this.first;
+		var nodeEnd = this.last;
+
+		while(nodeStart.next != this.first || nodeStart == nodeEnd){
+			console.log("NODE START", nodeStart);
+			console.log("NODE END", nodeEnd);
+			if(nodeStart == nodeEnd){
+				return	nodeStart;
+			}
+			else if(nodeStart.next == nodeEnd){
+				return	[nodeEnd.prev, nodeEnd];
+			}
+			else{
+				nodeStart = nodeStart.next;
+				nodeEnd = nodeEnd.prev;
+			}
+		}
+	}
+}
+
+LinkedList.Node = function(data){
+	this.prev = null;
+	this.next = null;
+	this.data = data;
+}
+
+var myList = new LinkedList.Circular();
+myList.append(new LinkedList.Node("Cheruth Cutestory"));
+myList.append(new LinkedList.Node("Gary Blunderbuss"));
+myList.append(new LinkedList.Node("Bobby Tugboats"));
+myList.append(new LinkedList.Node("Herbert Crabapple"));
+myList.append(new LinkedList.Node("Haunch Johnson"));
+myList.append(new LinkedList.Node("Crunchward Timesmith"));
+
+
+
+
+
+
+
+</script>
